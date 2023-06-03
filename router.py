@@ -8,6 +8,23 @@ ip_address_map = {
     'US': '20.171.111.32'
 }
 
+@app.route('/register', methods=['POST'])
+def register_endpoint():
+    # Get the data from the request
+    data = request.json
+
+    # Validate the data
+    if 'location' not in data or 'ip_address' not in data:
+        return 'Invalid data', 400
+
+    location = data['location']
+    ip_address = data['ip_address']
+
+    # Update the IP address map
+    ip_address_map[location] = ip_address
+
+    return 'IP address registered successfully', 200
+
 # Load the GeoIP2 database
 geoip_database = geoip2.database.Reader('path/to/GeoIP2-City.mmdb')
 
