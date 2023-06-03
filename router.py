@@ -4,7 +4,7 @@ import geoip2.database
 app = Flask(__name__)
 
 ip_address_map = {
-    'LK': '10.8.100.246',
+    'LK': '52.188.147.245',
     'US': '20.171.111.32'
 }
 
@@ -26,7 +26,7 @@ def register_endpoint():
     return 'IP address registered successfully', 200
 
 # Load the GeoIP2 database
-geoip_database = geoip2.database.Reader('path/to/GeoIP2-City.mmdb')
+geoip_database = geoip2.database.Reader('/home/nuvidu/fyp/GeoLite2-City.mmdb')
 
 @app.route('/publish', methods=['POST'])
 def original_endpoint1():
@@ -34,18 +34,23 @@ def original_endpoint1():
 
     # Get the user's IP address from the request
     user_ip = request.remote_addr
+    # user_ip="103.1.176.0"
+    # user_ip="175.157.74.223"
+    print("ip: ",user_ip)
 
     try:
         # Get the user's location based on the IP address
         response = geoip_database.city(user_ip)
+        # print("res: ",response)
         location = response.country.iso_code
+        # print("loc: ",location)
     except geoip2.errors.AddressNotFoundError:
         # Handle the case when the IP address is not found in the GeoIP database
         return 'Location not found', 404
 
     # Retrieve the corresponding IP address from the hashmap based on the location
     new_ip_address = ip_address_map.get(location)
-
+    # print("new: ",new_ip_address)
     if new_ip_address:
         # Perform the redirect
         new_url = f'http://{new_ip_address}:8081/publish'
