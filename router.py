@@ -7,10 +7,8 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-
-
 ip_address_map = {
-    'LK': '20.51.237.16',
+    'LK': '10.8.100.246',
     'US': '20.51.237.16'
 }
 
@@ -32,15 +30,13 @@ def register_endpoint():
     return 'IP address registered successfully', 200
 
 # Load the GeoIP2 database
-geoip_database = geoip2.database.Reader('/home/nuvidu/fyp/GeoLite2-City.mmdb')
+geoip_database = geoip2.database.Reader('/home/vinoja/Documents/FYP/GeoLite2-City_20230602/GeoLite2-City.mmdb')
 
 @app.route('/publish', methods=['POST'])
 def original_endpoint1():
     # Get the user's IP address from the request
     # user_ip = request.remote_addr
     user_ip = "175.157.74.223"
-    print("ip: ", user_ip)
-
     try:
         # Get the user's location based on the IP address
         response = geoip_database.city(user_ip)
@@ -53,43 +49,24 @@ def original_endpoint1():
     new_ip_address = ip_address_map.get(location)
 
     if new_ip_address:
-        # Construct the payload
-        payload = {
-            "query": "select order.orderId@string, order.country@string, item.unitPrice@float, order.totalRevenue@float, order.totalCost@float, order.totalProfit@float, order.eventTimestamp@long from item join order on item.itemType@string=order.itemType@string",
-            "apiKey": "Tu_TZ0W2cR92-sr1j-l7ACA.newone.9pej9tihskpx2vYZaxubGW3sFCJLzxe55NRh7T0uk1JMYiRmHdiQsWh5JhRXXT6c418385",
-            "id": "ZXCVB",
-            "locationEnabled": True
-        }
-
         # Create the response object
         response = redirect(f'http://{new_ip_address}:8081/publish', code=308)
 
-        # if request.method == 'OPTIONS':
-        #     response.headers['Access-Control-Request-Method'] = 'POST'
-
-        # Set the Access-Control-Allow-Origin header to allow requests from the same origin
-        response.headers['Access-Control-Allow-Origin'] = '*'  # or specify the appropriate origin
+        response.headers['Access-Control-Allow-Origin'] = '*'  
         response.headers['Access-Control-Allow-Methods'] = 'POST'
         response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
 
         response.headers['Content-Type'] = 'application/json'
-
-        # Set the Payload header in the redirect response
-        response.headers['Payload'] = json.dumps(payload)
-
         return response
     else:
         # Handle the case when the location is not found in the hashmap
         return 'Location not found', 404
 
-@app.route('/orderInfo', methods=['GET'])
+@app.route('/time', methods=['GET'])
 def original_endpoint2():
-    # Process the incoming data if needed
-
     # Get the user's IP address from the request
     # user_ip = request.remote_addr
     user_ip="175.157.74.223"
-
     try:
         # Get the user's location based on the IP address
         response = geoip_database.city(user_ip)
@@ -103,10 +80,8 @@ def original_endpoint2():
 
     if new_ip_address:
         # Perform the redirect
-        new_url = f'http://{new_ip_address}:8081/orderInfo'
+        new_url = f'http://{new_ip_address}:8081/time'
         response = redirect(new_url, code=308)
-
-        # Set the Access-Control-Allow-Origin header to allow requests from the same origin
         response.headers['Access-Control-Allow-Origin'] = request.headers.get('Origin')
         response.headers['Access-Control-Allow-Credentials'] = 'true'
         return response
